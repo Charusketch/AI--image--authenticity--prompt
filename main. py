@@ -1,1 +1,45 @@
+import os
+from google import genai
+from google.genai import types
+from PIL import Image
+
+# 1. Initialize the Gemini Client
+# Make sure to set your API key as an environment variable: export GEMINI_API_KEY="your_key"
+client = genai.Client()
+
+# 2. Define Your Custom System Prompt (from your project)
+SYSTEM_PROMPT = """
+You are an AI Image Authenticity Analyzer. 
+Your task is to analyze the provided image for signs of AI generation vs real photography.
+Focus on:
+- Lighting and shadow consistency
+- Anatomic details (hands, eyes, hair texture)
+- Background artifacts or unnatural smoothing
+Maintain an objective, analytical tone and highlight areas of uncertainty.
+"""
+
+def analyze_image(image_path: str):
+    """Loads an image and sends it for AI authenticity evaluation."""
+    if not os.path.exists(image_path):
+        print(f"Error: File '{image_path}' not found.")
+        return
+
+    # Load image using PIL
+    image = Image.open(image_path)
+
+    print("🔍 Analyzing image for authenticity...")
+    
+    # Generate content using Gemini 2.5 Flash Vision
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=[image, SYSTEM_PROMPT]
+    )
+
+    print("\n--- 📝 Analysis Report ---")
+    print(response.text)
+
+if __name__ == "__main__":
+    # Replace with the path to any local image file you want to test
+    test_image_path = "sample_image.jpg" 
+    analyze_image(test_image_path)
 
